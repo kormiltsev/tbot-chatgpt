@@ -21,11 +21,12 @@ type Message struct {
 	Content string `json:"content"`
 }
 
-type chatRequest struct {
-	Model       string    `json:"model"`
-	Messages    []Message `json:"messages"`
-	Temperature float32   `json:"temperature,omitempty"`
-	MaxTokens   int       `json:"max_tokens,omitempty"`
+type ChatRequest struct {
+	Model       string         `json:"model"`
+	Messages    []Message      `json:"messages"`
+	Temperature float32        `json:"temperature,omitempty"`
+	MaxTokens   int            `json:"max_tokens,omitempty"`
+	client      *ChatGPTClient `json:"-"`
 }
 
 type chatResponse struct {
@@ -44,13 +45,17 @@ func NewClient(apiKey, model string) *ChatGPTClient {
 }
 
 func (c *ChatGPTClient) Chat(messages []Message, temperature float32, maxTokens int) (*chatResponse, error) {
-	reqBody := chatRequest{
+	reqBody := ChatRequest{
 		Model:       c.Model,
 		Messages:    messages,
 		Temperature: temperature,
 		MaxTokens:   maxTokens,
 	}
-	reqJSON, err := json.Marshal(reqBody)
+	return c.sendRequest(&reqBody)
+}
+
+func (c *ChatGPTClient) sendRequest(request *ChatRequest) (*chatResponse, error) {
+	reqJSON, err := json.Marshal(request)
 	if err != nil {
 		return nil, err
 	}
