@@ -3,12 +3,33 @@ package main
 import (
 	"log"
 	"os"
+	"strconv"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/kormiltsev/tbot-chatgpt/configs"
 	"github.com/kormiltsev/tbot-chatgpt/pkg/chatgpt"
 )
 
 func main() {
+
+	envtemp := os.Getenv("CHATGPT_API_DEFAULT_TEMPERATURE")
+	if envtemp != "" {
+		envtempfloat, err := strconv.ParseFloat(envtemp, 32)
+		if err != nil {
+			log.Println("ENV wrong format", "CHATGPT_API_DEFAULT_TEMPERATURE", envtemp)
+		}
+		configs.DefaultTemperature = float32(envtempfloat)
+	}
+
+	envmaxtok := os.Getenv("CHATGPT_API_MAX_TOKENS")
+	if envmaxtok != "" {
+		envmaxtokint, err := strconv.Atoi(envmaxtok)
+		if err != nil {
+			log.Println("ENV wrong format", "CHATGPT_API_MAX_TOKENS", envmaxtok)
+		}
+		configs.DefaultMaxTokens = envmaxtokint
+	}
+
 	apiKey := os.Getenv("CHATGPT_API_TOKEN")
 	if apiKey == "" {
 		panic("CHATGPT_API_TOKEN is required")
@@ -38,7 +59,7 @@ func main() {
 			msg := update.Message.Text
 			log.Printf("[ %s ] %s", update.Message.From.UserName, update.Message.Text)
 
-			replytext, err := client.NewUserRequest(msg).WithMaxTokens(100).WithTemperature(0.7).Send()
+			replytext, err := client.NewUserRequest(msg).WithMaxTokens(configs.DefaultMaxTokens).WithTemperature(configs.DefaultTemperature).Send()
 			if err != nil {
 				replytext = "error: " + err.Error()
 			}
