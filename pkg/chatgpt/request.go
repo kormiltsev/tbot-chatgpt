@@ -54,6 +54,6 @@ func (chatreq *ChatRequest) Send() (string, error) {
 	}
 
 	log.Println("[ GPT ] Choises =", len(resp.Choices))
-	log.Println("[ GPT ]", "Role:", resp.Choices[0].Message.Role, "Message:", resp.Choices[0].Message.Content)
+	log.Printf("[ GPT ] (%s):%s", resp.Choices[0].Message.Role, resp.Choices[0].Message.Content)
 	return resp.Choices[0].Message.Content, nil
 }
