@@ -5,6 +5,7 @@
 *.so
 *.dylib
 *linux*
+*.tar
 
 # bins
 bin/
