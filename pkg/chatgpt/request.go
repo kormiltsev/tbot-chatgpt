@@ -48,6 +48,15 @@ func (chatreq *ChatRequest) WithSystemMessage(message string) *ChatRequest {
 }
 
 func (chatreq *ChatRequest) Send() (string, error) {
+	sysprompts := GetSysPrompts()
+	if len(sysprompts) != 0 {
+		sysprms := make([]Message, len(sysprompts))
+		for i := range sysprompts {
+			sysprms[i] = Message{Role: "system", Content: sysprompts[i]}
+		}
+		chatreq.Messages = append(sysprms, chatreq.Messages...)
+	}
+
 	resp, err := chatreq.client.sendRequest(chatreq)
 	if err != nil {
 		return "", err
