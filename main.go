@@ -7,6 +7,7 @@ import (
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/kormiltsev/tbot-chatgpt/configs"
+	"github.com/kormiltsev/tbot-chatgpt/internal/tbot"
 	"github.com/kormiltsev/tbot-chatgpt/pkg/chatgpt"
 )
 
@@ -55,19 +56,29 @@ func main() {
 
 	updates := bot.GetUpdatesChan(updateConfig)
 	for update := range updates {
-		if update.Message != nil {
+		if update.Message == nil {
+			continue
+		}
+
+		var replytext string
+		if update.Message.IsCommand() {
+			replytext, err = tbot.Command(bot, update.Message)
+			if err != nil {
+				replytext = "internal error" + err.Error()
+			}
+		} else {
 			msg := update.Message.Text
 			log.Printf("[ %s ] %s", update.Message.From.UserName, update.Message.Text)
 
-			replytext, err := client.NewUserRequest(msg).WithMaxTokens(configs.DefaultMaxTokens).WithTemperature(configs.DefaultTemperature).Send()
+			replytext, err = client.NewUserRequest(msg).WithMaxTokens(configs.DefaultMaxTokens).WithTemperature(configs.DefaultTemperature).Send()
 			if err != nil {
 				replytext = "error: " + err.Error()
 			}
-			reply := tgbotapi.NewMessage(update.Message.Chat.ID, replytext)
-
-			if _, err := bot.Send(reply); err != nil {
-				log.Println("Failed to send message:", err)
-			}
 		}
+		reply := tgbotapi.NewMessage(update.Message.Chat.ID, replytext)
+		if _, err := bot.Send(reply); err != nil {
+			log.Println("Failed to send message:", err)
+		}
+
 	}
 }
