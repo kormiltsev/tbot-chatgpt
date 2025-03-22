@@ -9,8 +9,11 @@ var (
 		1.0: Very creative, diverse, but less predictable => Brainstorming, storytelling, creative writing
 		>1.0: Highly random, often incoherent => Rarely used unless you need chaotic output
 	*/
-	DefaultTemperature float32 = 0.7
+	Temperature float32 = 0.7
 
 	// Response limit. Cuts long responses.
-	DefaultMaxTokens int = 1000
+	MaxTokens int = 1000
+
+	// AdminID to recognize messages from Admin
+	AdminID int64 = 0
 )
